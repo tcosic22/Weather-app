@@ -1,8 +1,8 @@
 # Simple web-application for tracking weather around the world
 
 ## Author
-Name | E-mail | Username
-Tomislav Ćosić | tcosic22@foi.hr | tcosic22
+Name: Tomislav Ćosić
+E-mail: tomcosic17@gmail.com / tcosic22@foi.hr
 
 ## Description
 The weather app allows the user to type in any location to check the current weather conditions such as temperature, type of weather and others. Alongside the information, an appropriate background image and weather icon will be displayed.
