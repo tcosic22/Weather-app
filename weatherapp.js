@@ -17,7 +17,7 @@ gumbPretrazi.addEventListener('click', () =>{
     }
     else 
     {
-        window.alert("Molim vas unesite naziv grada.");
+        window.alert("Naziv grada ne može ostati prazan.");
     }
 })
 
@@ -43,8 +43,50 @@ function getWeatherByLocation(lokacija){
 
         switch(data.weather[0].main)
         {
+            case 'Clear':
+                ikonica.src = "./slike/vrijeme/vedro.png";
+                break;
             case 'Clouds':
                 ikonica.src = "./slike/vrijeme/oblak.png";
+                break;
+            case 'Rain':
+                ikonica.src = "./slike/vrijeme/kisa.png";
+                break;
+            case 'Drizzle':
+                ikonica.src = "./slike/vrijeme/rosulja.png";
+                break;
+            case 'Thunderstorm':
+                ikonica.src = "./slike/vrijeme/grmljavina.png";
+                break;
+            case 'Snow':
+                ikonica.src = "./slike/vrijeme/snijeg.png";
+                break;
+            case 'Mist':
+                ikonica.src = "./slike/vrijeme/magla.png";
+                break;
+            case 'Smoke':
+                ikonica.src = "./slike/vrijeme/dim.png";
+                break;
+            case 'Haze':
+                ikonica.src = "./slike/vrijeme/izmaglica.png";
+                break;
+            case 'Dust':
+                ikonica.src = "./slike/vrijeme/prasina.png";
+                break;
+            case 'Fog':
+                ikonica.src = "./slike/vrijeme/magla2.png";
+                break;
+            case 'Sand':
+                ikonica.src = "./slike/vrijeme/pijesak.png";
+                break;
+            case 'Ash':
+                ikonica.src = "./slike/vrijeme/pepeo.png";
+                break;
+            case 'Squall':
+                ikonica.src = "./slike/vrijeme/vjetar.png";
+                break;
+            case 'Tornado':
+                ikonica.src = "./slike/vrijeme/tornado.png";
                 break;
             default:
                 ikonica.src = "./slike/vrijeme/blank.png";
@@ -65,7 +107,6 @@ function setBackgroundImage(drzava)
     const sAmerika = ["AG", "BS", "BB", "BZ", "CA", "CR", "CU", "DM", "DO", "SV", "GD", "GT", "HT", "HN", "JM", "MX", "NI", "PA", "KN", "LC", "VC", "TT", "US"];
     const jAmerika = ["AR", "BO", "BR", "CL", "CO", "EC", "GY", "PY", "PE", "SR", "UY", "VE"];
     const australija = ["AS", "AU", "FJ", "KI", "MH", "FM", "NR", "NZ", "PW", "PG", "WS", "SB", "TO", "TV", "VU"];
-    const antarktika = ["AQ"];
 
     if(afrika.includes(drzava))
     {
@@ -90,10 +131,6 @@ function setBackgroundImage(drzava)
     else if(australija.includes(drzava))
     {
         document.body.style.background = "url('./slike/kontinenti/australija.jpg')";
-    }
-    else if(antarktika.includes(drzava))
-    {
-        document.body.style.background = "url('./slike/kontinenti/antarktikajpg')";
     }
 }
 
