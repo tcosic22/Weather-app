@@ -132,5 +132,10 @@ function setBackgroundImage(drzava)
     {
         document.body.style.background = "url('./slike/kontinenti/australija.jpg')";
     }
+    else
+    {
+        document.body.style.background = "url('./slike/kontinenti/antarktika.jpg')";
+    }
+
 }
 

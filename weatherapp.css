@@ -34,3 +34,8 @@ input[type="text"] {
     margin-top: 20px;
     padding: 20px;
 }
+
+#ikonica {
+    width: 100px;
+    height: 100px;
+}
