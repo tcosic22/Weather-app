@@ -1,6 +1,7 @@
 const apiKey='298949921e8229b3e70c0ae7788b2004';
-const apiUrl='https://api.openweathermap.org/data/2.5/weather';
+const apiUrl='https://api.openweathermap.org/';
 
+//dohvaćanje elemenata iz HTML-a
 const unosLokacije = document.getElementById('unosLokacije');
 const gumbPretrazi = document.getElementById('gumbPretrazi');
 const grad = document.getElementById('grad');
@@ -9,11 +10,13 @@ const vrijeme = document.getElementById('vrijeme');
 const temperatura = document.getElementById('temperatura');
 const ikonica = document.getElementById('ikonica');
 
+//dodavanje event listenera na gumb
 gumbPretrazi.addEventListener('click', () =>{
     const lokacija = unosLokacije.value;
     if(lokacija)
     {
         getWeatherByLocation(lokacija);
+        getWeatherByLocation5Days(lokacija);
     }
     else 
     {
@@ -21,8 +24,9 @@ gumbPretrazi.addEventListener('click', () =>{
     }
 })
 
+//funkcija za dohvaćanje podataka o trenutnom vremenu
 function getWeatherByLocation(lokacija){
-    const url = `${apiUrl}?q=${lokacija}&appid=${apiKey}`;
+    const url = `${apiUrl}data/2.5/weather?q=${lokacija}&appid=${apiKey}`;
 
     fetch(url)
     .then(response =>{
@@ -32,16 +36,99 @@ function getWeatherByLocation(lokacija){
         return response.json();
     })
     .then(data => {
-        console.log(JSON.stringify(data));
+        //console.log(JSON.stringify(data));
 
         grad.innerHTML = data.name;
         drzava.innerHTML = data.sys.country;
         vrijeme.innerHTML = data.weather[0].main;
         temperatura.innerHTML = Math.round(data.main.temp - 273.15) + '°C';
 
+        setIcon(data.weather[0].main);
         setBackgroundImage(data.sys.country);
 
-        switch(data.weather[0].main)
+    })
+    .catch(error => {
+        console.log(error);
+        window.alert(error.message);
+    })
+}
+
+//funkcija za dohvaćanje podataka o vremenu za narednih 5 dana
+async function getWeatherByLocation5Days(lokacija){
+
+    const [geo_sirina, geo_duzina] = await getLatituteAndLongitude(lokacija);
+
+    const url = `${apiUrl}data/2.5/forecast?lat=${geo_sirina}&lon=${geo_duzina}&exclude=current,minutely,hourly&appid=${apiKey}&units=metric`;
+
+    fetch(url)
+    .then(response => response.json())
+    .then(data => {
+        //console.log(JSON.stringify(data));
+        const prognoze = data.list;
+        const prognozaPoDanima = {};
+
+        prognoze.forEach(dan => {
+            const datum = new Date(dan.dt * 1000).toLocaleDateString('hr-HR', {weekday: 'long'});
+            if (!prognozaPoDanima[datum]) {
+                prognozaPoDanima[datum] = [];
+            }
+            prognozaPoDanima[datum].push(dan);
+        });
+
+        /*const prognozaContainer = document.getElementById('prognozaZa5Dana'); 
+        prognozaContainer.innerHTML = "";*/
+
+        Object.entries(prognozaPoDanima).forEach(([datum, index]) => {
+            if (index < 5)
+            {
+                const dnevnePrognoze = prognozaPoDanima[datum];
+
+                const podnePrognoza = dnevnePrognoze.find(p => p.dt_txt.includes('12:00:00')) || dnevnePrognoze[0];
+
+                const tempDanas = podnePrognoza.main.temp;
+                const tempMin = Math.min(...dnevnePrognoze.map(p => p.main.temp_min));
+                const tempMax = Math.max(...dnevnePrognoze.map(p => p.main.temp_max));
+                const vrijeme = podnePrognoza.weather[0].main;
+                //console.log(`${datum}: ${vrijeme}, Temp: ${tempDanas}°C, Min: ${tempMin}°C, Max: ${tempMax}°C`);
+
+                /*const prognozaHTML = `
+                    <div class="dan-prognoza">
+                        <h3>${datum}</h3>
+                        <p>Opis: ${opis}</p>
+                        <p>Temperatura: ${tempDanas}°C</p>
+                        <p>Min: ${tempMin}°C, Max: ${tempMax}°C</p>
+                    </div>
+                `;
+
+                prognozaContainer.innerHTML += prognozaHTML;*/
+
+                setIcon(vrijeme);
+            }
+        });
+
+
+    })
+    .catch(error => {
+        console.error("Greška prilikom dohvaćanja vremenskih podataka:", error);
+    });
+}
+
+//funckija za dohvaćanje geografske dužine i širine za pojedini grad
+async function getLatituteAndLongitude(lokacija){
+    const url = `${apiUrl}geo/1.0/direct?q=${lokacija}&limit=1&appid=${apiKey}`;
+
+    const response = await fetch(url); //cekanje da se izvrsi fetch
+    const data = await response.json(); 
+    const geo_sirina = data[0].lat;
+    const geo_duzina = data[0].lon;
+
+    return [geo_sirina, geo_duzina];
+}
+
+//funkcija za postavljanje ikonice ovisno o vremenskim uvjetima
+function setIcon(vrijeme){
+    
+    switch(vrijeme)
         {
             case 'Clear':
                 ikonica.src = "./slike/vrijeme/vedro.png";
@@ -92,13 +179,9 @@ function getWeatherByLocation(lokacija){
                 ikonica.src = "./slike/vrijeme/blank.png";
                 break;
         }
-    })
-    .catch(error => {
-        console.log(error);
-        window.alert(error.message);
-    })
 }
 
+//funkcija za postavljanje pozadine ovisno o kontinentu
 function setBackgroundImage(drzava)
 {
     const afrika = ["DZ", "AO", "BJ", "BW", "BF", "BI", "CM", "CV", "CF", "TD", "KM", "CG", "CD", "CI", "DJ", "EG", "GQ", "ER", "SZ", "ET", "GA", "GM", "GH", "GN", "GW", "KE", "LS", "LR", "LY", "MG", "MW", "ML", "MR", "MU", "MA", "MZ", "NA", "NE", "NG", "RW", "ST", "SN", "SC", "SL", "SO", "ZA", "SS", "SD", "TZ", "TG", "TN", "UG", "EH", "ZM", "ZW"];
