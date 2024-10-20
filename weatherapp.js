@@ -75,14 +75,21 @@ async function getWeatherByLocation5Days(lokacija){
             prognozaPoDanima[datum].push(dan);
         });
 
-        /*const prognozaContainer = document.getElementById('prognozaZa5Dana'); 
-        prognozaContainer.innerHTML = "";*/
+        const prognozaContainer = document.getElementById('prognoza5dana'); 
+        prognozaContainer.innerHTML = "";
 
-        Object.entries(prognozaPoDanima).forEach(([datum, index]) => {
+        let index = 0;
+        let preskociDanas = false;
+
+        Object.entries(prognozaPoDanima).forEach(([datum, dnevnePrognoze]) => {
+            if(!preskociDanas)
+            {
+                preskociDanas = true;
+                return;
+            }
+
             if (index < 5)
             {
-                const dnevnePrognoze = prognozaPoDanima[datum];
-
                 const podnePrognoza = dnevnePrognoze.find(p => p.dt_txt.includes('12:00:00')) || dnevnePrognoze[0];
 
                 const tempDanas = podnePrognoza.main.temp;
@@ -91,18 +98,20 @@ async function getWeatherByLocation5Days(lokacija){
                 const vrijeme = podnePrognoza.weather[0].main;
                 //console.log(`${datum}: ${vrijeme}, Temp: ${tempDanas}°C, Min: ${tempMin}°C, Max: ${tempMax}°C`);
 
-                /*const prognozaHTML = `
-                    <div class="dan-prognoza">
+                const prognozaHTML = `
+                    <div class="dan">
                         <h3>${datum}</h3>
-                        <p>Opis: ${opis}</p>
+                        <p>Vrijeme: ${vrijeme}</p>
                         <p>Temperatura: ${tempDanas}°C</p>
                         <p>Min: ${tempMin}°C, Max: ${tempMax}°C</p>
                     </div>
                 `;
 
-                prognozaContainer.innerHTML += prognozaHTML;*/
+                prognozaContainer.innerHTML += prognozaHTML;
 
                 setIcon(vrijeme);
+
+                index++;
             }
         });
 
