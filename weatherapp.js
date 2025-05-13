@@ -9,10 +9,17 @@ const weather = document.getElementById('weather');
 const temperature = document.getElementById('temperature');
 const icon = document.getElementById('icon');
 
+window.addEventListener('load', () => {
+    rotateBackgroundImage();
+});
+
+let backgroundIntervalId = null;
+
 buttonSearch.addEventListener('click', () =>{
     const location = inputLocation.value;
     if(location)
     {
+        stopBackgroundRotation();
         getWeatherByLocation(location);
         getWeatherByLocation5Days(location);
     }
@@ -21,6 +28,32 @@ buttonSearch.addEventListener('click', () =>{
         window.alert("City name can't be blank.");
     }
 })
+
+function rotateBackgroundImage()
+{
+    const images = [
+        "./pictures/backgrounds/bg1.jpg",
+        "./pictures/backgrounds/bg2.jpg",
+        "./pictures/backgrounds/bg3.jpeg",
+        "./pictures/backgrounds/bg4.jpeg",
+        "./pictures/backgrounds/bg5.jpeg",
+    ];
+
+    let currentIndex = 0;
+    const bgLayer = document.getElementById("background-layer");
+
+    backgroundIntervalId = setInterval(() => {
+        currentIndex = (currentIndex + 1) % images.length;
+        bgLayer.style.backgroundImage = `url(${images[currentIndex]})`;
+    }, 5000);
+}
+
+function stopBackgroundRotation() {
+    if (backgroundIntervalId !== null) {
+        clearInterval(backgroundIntervalId);
+        backgroundIntervalId = null;
+    }
+}
 
 function getWeatherByLocation(location){
     const url = `${apiUrl}data/2.5/weather?q=${location}&appid=${apiKey}`;
@@ -84,12 +117,12 @@ async function getWeatherByLocation5Days(location){
 
             if (index < 5)
             {
-                const podnePrognoza = dailyForecast.find(p => p.dt_txt.includes('12:00:00')) || dailyForecast[0];
+                const noonForecast = dailyForecast.find(p => p.dt_txt.includes('12:00:00')) || dailyForecast[0];
 
-                const tempToday = podnePrognoza.main.temp;
+                const tempToday = noonForecast.main.temp;
                 const tempMin = Math.min(...dailyForecast.map(p => p.main.temp_min));
                 const tempMax = Math.max(...dailyForecast.map(p => p.main.temp_max));
-                const weather = podnePrognoza.weather[0].main;
+                const weather = noonForecast.weather[0].main;
 
                 const forecastHTML = `
                     <div class="day">
