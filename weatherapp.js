@@ -1,4 +1,4 @@
-import { apiKey } from './config.js';
+const apiKey = window.apiKey;
 const apiUrl='https://api.openweathermap.org/';
 
 const inputLocation = document.getElementById('inputLocation');
