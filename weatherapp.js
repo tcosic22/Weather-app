@@ -1,7 +1,6 @@
 const apiKey='298949921e8229b3e70c0ae7788b2004';
 const apiUrl='https://api.openweathermap.org/';
 
-//dohvaćanje elemenata iz HTML-a
 const inputLocation = document.getElementById('inputLocation');
 const buttonSearch = document.getElementById('buttonSearch');
 const city = document.getElementById('city');
@@ -63,7 +62,7 @@ async function getWeatherByLocation5Days(location){
         const forecastByDay = {};
 
         forecast.forEach(day => {
-            const date = new Date(day.dt * 1000).toLocaleDateString('hr-HR', {weekday: 'long'});
+            const date = new Date(day.dt * 1000).toLocaleDateString('en-US', {weekday: 'long'});
             if (!forecastByDay[date]) {
                 forecastByDay[date] = [];
             }
