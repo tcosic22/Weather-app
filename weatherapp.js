@@ -8,6 +8,7 @@ const country = document.getElementById('country');
 const weather = document.getElementById('weather');
 const temperature = document.getElementById('temperature');
 const icon = document.getElementById('icon');
+const bgLayer = document.getElementById("background-layer");
 
 window.addEventListener('load', () => {
     rotateBackgroundImage();
@@ -35,12 +36,11 @@ function rotateBackgroundImage()
         "./pictures/backgrounds/bg1.jpg",
         "./pictures/backgrounds/bg2.jpg",
         "./pictures/backgrounds/bg3.jpeg",
-        "./pictures/backgrounds/bg4.jpeg",
-        "./pictures/backgrounds/bg5.jpeg",
+        "./pictures/backgrounds/bg4.jpg",
+        "./pictures/backgrounds/bg5.jpg",
     ];
 
     let currentIndex = 0;
-    const bgLayer = document.getElementById("background-layer");
 
     backgroundIntervalId = setInterval(() => {
         currentIndex = (currentIndex + 1) % images.length;
@@ -225,31 +225,31 @@ function setBackgroundImage(country)
 
     if(africa.includes(country))
     {
-        document.body.style.background = "url('./pictures/continents/africa.jpg')";
+        bgLayer.style.backgroundImage = "url('./pictures/continents/africa.jpg')";
     }
     else if(asia.includes(country))
     {
-        document.body.style.background = "url('./pictures/continents/asia.jpeg')";
+        bgLayer.style.backgroundImage = "url('./pictures/continents/asia.jpeg')";
     }
     else if(europe.includes(country))
     {
-        document.body.style.background = "url('./pictures/continents/europe.jpg')";
+        bgLayer.style.backgroundImage = "url('./pictures/continents/europe.jpg')";
     }
     else if(nAmerica.includes(country))
     {
-        document.body.style.background = "url('./pictures/continents/nAmerica.jpg')";
+        bgLayer.style.backgroundImage = "url('./pictures/continents/nAmerica.jpg')";
     }
     else if(sAmerica.includes(country))
     {
-        document.body.style.background = "url('./pictures/continents/sAmerica.jpg')";
+        bgLayer.style.backgroundImage = "url('./pictures/continents/sAmerica.jpg')";
     }
     else if(australia.includes(country))
     {
-        document.body.style.background = "url('./pictures/continents/australia.jpg')";
+        bgLayer.style.backgroundImage = "url('./pictures/continents/australia.jpg')";
     }
     else
     {
-        document.body.style.background = "url('./pictures/continents/antarctica.jpg')";
+        bgLayer.style.backgroundImage = "url('./pictures/continents/antarctica.jpg')";
     }
 
 }
