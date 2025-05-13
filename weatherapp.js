@@ -2,46 +2,43 @@ const apiKey='298949921e8229b3e70c0ae7788b2004';
 const apiUrl='https://api.openweathermap.org/';
 
 //dohvaćanje elemenata iz HTML-a
-const unosLokacije = document.getElementById('unosLokacije');
-const gumbPretrazi = document.getElementById('gumbPretrazi');
-const grad = document.getElementById('grad');
-const drzava = document.getElementById('drzava');
-const vrijeme = document.getElementById('vrijeme');
-const temperatura = document.getElementById('temperatura');
-const ikonica = document.getElementById('ikonica');
+const inputLocation = document.getElementById('inputLocation');
+const buttonSearch = document.getElementById('buttonSearch');
+const city = document.getElementById('city');
+const country = document.getElementById('country');
+const weather = document.getElementById('weather');
+const temperature = document.getElementById('temperature');
+const icon = document.getElementById('icon');
 
-//dodavanje event listenera na gumb
-gumbPretrazi.addEventListener('click', () =>{
-    const lokacija = unosLokacije.value;
-    if(lokacija)
+buttonSearch.addEventListener('click', () =>{
+    const location = inputLocation.value;
+    if(location)
     {
-        getWeatherByLocation(lokacija);
-        getWeatherByLocation5Days(lokacija);
+        getWeatherByLocation(location);
+        getWeatherByLocation5Days(location);
     }
     else 
     {
-        window.alert("Naziv grada ne može ostati prazan.");
+        window.alert("City name can't be blank.");
     }
 })
 
-//funkcija za dohvaćanje podataka o trenutnom vremenu
-function getWeatherByLocation(lokacija){
-    const url = `${apiUrl}data/2.5/weather?q=${lokacija}&appid=${apiKey}`;
+function getWeatherByLocation(location){
+    const url = `${apiUrl}data/2.5/weather?q=${location}&appid=${apiKey}`;
 
     fetch(url)
     .then(response =>{
         if (!response.ok) {
-            throw new Error("Neispravna lokacija. Molim vas unesite ispravni naziv grada.");
+            throw new Error("Invalid location. Please enter a valid city name.");
         }
         return response.json();
     })
     .then(data => {
-        //console.log(JSON.stringify(data));
 
-        grad.innerHTML = data.name;
-        drzava.innerHTML = data.sys.country;
-        vrijeme.innerHTML = data.weather[0].main;
-        temperatura.innerHTML = Math.round(data.main.temp - 273.15) + '°C';
+        city.innerHTML = data.name;
+        country.innerHTML = data.sys.country;
+        weather.innerHTML = data.weather[0].main;
+        temperature.innerHTML = Math.round(data.main.temp - 273.15) + '°C';
 
         setIcon(data.weather[0].main);
         setBackgroundImage(data.sys.country);
@@ -53,63 +50,60 @@ function getWeatherByLocation(lokacija){
     })
 }
 
-//funkcija za dohvaćanje podataka o vremenu za narednih 5 dana
-async function getWeatherByLocation5Days(lokacija){
+async function getWeatherByLocation5Days(location){
 
-    const [geo_sirina, geo_duzina] = await getLatituteAndLongitude(lokacija);
+    const [latitude, longitude] = await getLatitudeAndLongitude(location);
 
-    const url = `${apiUrl}data/2.5/forecast?lat=${geo_sirina}&lon=${geo_duzina}&exclude=current,minutely,hourly&appid=${apiKey}&units=metric`;
+    const url = `${apiUrl}data/2.5/forecast?lat=${latitude}&lon=${longitude}&exclude=current,minutely,hourly&appid=${apiKey}&units=metric`;
 
     fetch(url)
     .then(response => response.json())
     .then(data => {
-        //console.log(JSON.stringify(data));
-        const prognoze = data.list;
-        const prognozaPoDanima = {};
+        const forecast = data.list;
+        const forecastByDay = {};
 
-        prognoze.forEach(dan => {
-            const datum = new Date(dan.dt * 1000).toLocaleDateString('hr-HR', {weekday: 'long'});
-            if (!prognozaPoDanima[datum]) {
-                prognozaPoDanima[datum] = [];
+        forecast.forEach(day => {
+            const date = new Date(day.dt * 1000).toLocaleDateString('hr-HR', {weekday: 'long'});
+            if (!forecastByDay[date]) {
+                forecastByDay[date] = [];
             }
-            prognozaPoDanima[datum].push(dan);
+            forecastByDay[date].push(day);
         });
 
-        const prognozaContainer = document.getElementById('prognoza5dana'); 
-        prognozaContainer.innerHTML = "";
+        const forecastContainer = document.getElementById('fiveDayForecast'); 
+        forecastContainer.innerHTML = "";
 
         let index = 0;
-        let preskociDanas = false;
+        let skipToday = false;
 
-        Object.entries(prognozaPoDanima).forEach(([datum, dnevnePrognoze]) => {
-            if(!preskociDanas)
+        Object.entries(forecastByDay).forEach(([date, dailyForecast]) => {
+            if(!skipToday)
             {
-                preskociDanas = true;
+                skipToday = true;
                 return;
             }
 
             if (index < 5)
             {
-                const podnePrognoza = dnevnePrognoze.find(p => p.dt_txt.includes('12:00:00')) || dnevnePrognoze[0];
+                const podnePrognoza = dailyForecast.find(p => p.dt_txt.includes('12:00:00')) || dailyForecast[0];
 
-                const tempDanas = podnePrognoza.main.temp;
-                const tempMin = Math.min(...dnevnePrognoze.map(p => p.main.temp_min));
-                const tempMax = Math.max(...dnevnePrognoze.map(p => p.main.temp_max));
-                const vrijeme = podnePrognoza.weather[0].main;
-                //console.log(`${datum}: ${vrijeme}, Temp: ${tempDanas}°C, Min: ${tempMin}°C, Max: ${tempMax}°C`);
+                const tempToday = podnePrognoza.main.temp;
+                const tempMin = Math.min(...dailyForecast.map(p => p.main.temp_min));
+                const tempMax = Math.max(...dailyForecast.map(p => p.main.temp_max));
+                const weather = podnePrognoza.weather[0].main;
 
-                const prognozaHTML = `
-                    <div class="dan">
-                        <h3>${datum}</h3>
-                        <p>Vrijeme: ${vrijeme}</p>
-                        <p>Temperatura: ${tempDanas}°C</p>
+                const forecastHTML = `
+                    <div class="day">
+                        <h3>${date}</h3>
+                        <p>weather: ${weather}</p>
+                        <p>temperature: ${tempToday}°C</p>
                         <p>Min: ${tempMin}°C, Max: ${tempMax}°C</p>
                     </div>
                 `;
 
-                prognozaContainer.innerHTML += prognozaHTML;
+                forecastContainer.innerHTML += forecastHTML;
 
-                setIcon(vrijeme);
+                setIcon(weather);
 
                 index++;
             }
@@ -118,115 +112,112 @@ async function getWeatherByLocation5Days(lokacija){
 
     })
     .catch(error => {
-        console.error("Greška prilikom dohvaćanja vremenskih podataka:", error);
+        console.error("Error while retrieving forecast:", error);
     });
 }
 
-//funckija za dohvaćanje geografske dužine i širine za pojedini grad
-async function getLatituteAndLongitude(lokacija){
-    const url = `${apiUrl}geo/1.0/direct?q=${lokacija}&limit=1&appid=${apiKey}`;
+async function getLatitudeAndLongitude(location){
+    const url = `${apiUrl}geo/1.0/direct?q=${location}&limit=1&appid=${apiKey}`;
 
-    const response = await fetch(url); //cekanje da se izvrsi fetch
+    const response = await fetch(url);
     const data = await response.json(); 
-    const geo_sirina = data[0].lat;
-    const geo_duzina = data[0].lon;
+    const latitude = data[0].lat;
+    const longitude = data[0].lon;
 
-    return [geo_sirina, geo_duzina];
+    return [latitude, longitude];
 }
 
-//funkcija za postavljanje ikonice ovisno o vremenskim uvjetima
-function setIcon(vrijeme){
+function setIcon(weather){
     
-    switch(vrijeme)
+    switch(weather)
         {
             case 'Clear':
-                ikonica.src = "./slike/vrijeme/vedro.png";
+                icon.src = "./pictures/weather/clear.png";
                 break;
             case 'Clouds':
-                ikonica.src = "./slike/vrijeme/oblak.png";
+                icon.src = "./pictures/weather/clouds.png";
                 break;
             case 'Rain':
-                ikonica.src = "./slike/vrijeme/kisa.png";
+                icon.src = "./pictures/weather/rain.png";
                 break;
             case 'Drizzle':
-                ikonica.src = "./slike/vrijeme/rosulja.png";
+                icon.src = "./pictures/weather/drizzle.png";
                 break;
             case 'Thunderstorm':
-                ikonica.src = "./slike/vrijeme/grmljavina.png";
+                icon.src = "./pictures/weather/thunderstorm.png";
                 break;
             case 'Snow':
-                ikonica.src = "./slike/vrijeme/snijeg.png";
+                icon.src = "./pictures/weather/snow.png";
                 break;
             case 'Mist':
-                ikonica.src = "./slike/vrijeme/magla.png";
+                icon.src = "./pictures/weather/mist.png";
                 break;
             case 'Smoke':
-                ikonica.src = "./slike/vrijeme/dim.png";
+                icon.src = "./pictures/weather/smoke.png";
                 break;
             case 'Haze':
-                ikonica.src = "./slike/vrijeme/izmaglica.png";
+                icon.src = "./pictures/weather/haze.png";
                 break;
             case 'Dust':
-                ikonica.src = "./slike/vrijeme/prasina.png";
+                icon.src = "./pictures/weather/dust.png";
                 break;
             case 'Fog':
-                ikonica.src = "./slike/vrijeme/magla2.png";
+                icon.src = "./pictures/weather/fog.png";
                 break;
             case 'Sand':
-                ikonica.src = "./slike/vrijeme/pijesak.png";
+                icon.src = "./pictures/weather/sand.png";
                 break;
             case 'Ash':
-                ikonica.src = "./slike/vrijeme/pepeo.png";
+                icon.src = "./pictures/weather/ash.png";
                 break;
             case 'Squall':
-                ikonica.src = "./slike/vrijeme/vjetar.png";
+                icon.src = "./pictures/weather/squall.png";
                 break;
             case 'Tornado':
-                ikonica.src = "./slike/vrijeme/tornado.png";
+                icon.src = "./pictures/weather/tornado.png";
                 break;
             default:
-                ikonica.src = "./slike/vrijeme/blank.png";
+                icon.src = "./pictures/weather/blank.png";
                 break;
         }
 }
 
-//funkcija za postavljanje pozadine ovisno o kontinentu
-function setBackgroundImage(drzava)
+function setBackgroundImage(country)
 {
-    const afrika = ["DZ", "AO", "BJ", "BW", "BF", "BI", "CM", "CV", "CF", "TD", "KM", "CG", "CD", "CI", "DJ", "EG", "GQ", "ER", "SZ", "ET", "GA", "GM", "GH", "GN", "GW", "KE", "LS", "LR", "LY", "MG", "MW", "ML", "MR", "MU", "MA", "MZ", "NA", "NE", "NG", "RW", "ST", "SN", "SC", "SL", "SO", "ZA", "SS", "SD", "TZ", "TG", "TN", "UG", "EH", "ZM", "ZW"];
-    const azija = ["AF", "AM", "AZ", "BH", "BD", "BT", "BN", "KH", "CN", "CY", "GE", "IN", "ID", "IR", "IQ", "IL", "JP", "JO", "KZ", "KW", "KG", "LA", "LB", "MY", "MV", "MN", "MM", "NP", "KP", "OM", "PK", "PS", "PH", "QA", "SA", "SG", "KR", "LK", "SY", "TW", "TJ", "TH", "TL", "TR", "TM", "AE", "UZ", "VN", "YE"];
-    const europa = ["AL", "AD", "AT", "BY", "BE", "BA", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "GE", "DE", "GR", "HU", "IS", "IE", "IT", "XK", "LV", "LI", "LT", "LU", "MT", "MD", "MC", "ME", "NL", "MK", "NO", "PL", "PT", "RO", "RU", "SM", "RS", "SK", "SI", "ES", "SE", "CH", "UA", "GB", "VA"];
-    const sAmerika = ["AG", "BS", "BB", "BZ", "CA", "CR", "CU", "DM", "DO", "SV", "GD", "GT", "HT", "HN", "JM", "MX", "NI", "PA", "KN", "LC", "VC", "TT", "US"];
-    const jAmerika = ["AR", "BO", "BR", "CL", "CO", "EC", "GY", "PY", "PE", "SR", "UY", "VE"];
-    const australija = ["AS", "AU", "FJ", "KI", "MH", "FM", "NR", "NZ", "PW", "PG", "WS", "SB", "TO", "TV", "VU"];
+    const africa = ["DZ", "AO", "BJ", "BW", "BF", "BI", "CM", "CV", "CF", "TD", "KM", "CG", "CD", "CI", "DJ", "EG", "GQ", "ER", "SZ", "ET", "GA", "GM", "GH", "GN", "GW", "KE", "LS", "LR", "LY", "MG", "MW", "ML", "MR", "MU", "MA", "MZ", "NA", "NE", "NG", "RW", "ST", "SN", "SC", "SL", "SO", "ZA", "SS", "SD", "TZ", "TG", "TN", "UG", "EH", "ZM", "ZW"];
+    const asia = ["AF", "AM", "AZ", "BH", "BD", "BT", "BN", "KH", "CN", "CY", "GE", "IN", "ID", "IR", "IQ", "IL", "JP", "JO", "KZ", "KW", "KG", "LA", "LB", "MY", "MV", "MN", "MM", "NP", "KP", "OM", "PK", "PS", "PH", "QA", "SA", "SG", "KR", "LK", "SY", "TW", "TJ", "TH", "TL", "TR", "TM", "AE", "UZ", "VN", "YE"];
+    const europe = ["AL", "AD", "AT", "BY", "BE", "BA", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "GE", "DE", "GR", "HU", "IS", "IE", "IT", "XK", "LV", "LI", "LT", "LU", "MT", "MD", "MC", "ME", "NL", "MK", "NO", "PL", "PT", "RO", "RU", "SM", "RS", "SK", "SI", "ES", "SE", "CH", "UA", "GB", "VA"];
+    const nAmerica = ["AG", "BS", "BB", "BZ", "CA", "CR", "CU", "DM", "DO", "SV", "GD", "GT", "HT", "HN", "JM", "MX", "NI", "PA", "KN", "LC", "VC", "TT", "US"];
+    const sAmerica = ["AR", "BO", "BR", "CL", "CO", "EC", "GY", "PY", "PE", "SR", "UY", "VE"];
+    const australia = ["AS", "AU", "FJ", "KI", "MH", "FM", "NR", "NZ", "PW", "PG", "WS", "SB", "TO", "TV", "VU"];
 
-    if(afrika.includes(drzava))
+    if(africa.includes(country))
     {
-        document.body.style.background = "url('./slike/kontinenti/afrika.jpg')";
+        document.body.style.background = "url('./pictures/continents/africa.jpg')";
     }
-    else if(azija.includes(drzava))
+    else if(asia.includes(country))
     {
-        document.body.style.background = "url('./slike/kontinenti/azija.jpeg')";
+        document.body.style.background = "url('./pictures/continents/asia.jpeg')";
     }
-    else if(europa.includes(drzava))
+    else if(europe.includes(country))
     {
-        document.body.style.background = "url('./slike/kontinenti/europa.jpg')";
+        document.body.style.background = "url('./pictures/continents/europe.jpg')";
     }
-    else if(sAmerika.includes(drzava))
+    else if(nAmerica.includes(country))
     {
-        document.body.style.background = "url('./slike/kontinenti/sAmerika.jpg')";
+        document.body.style.background = "url('./pictures/continents/nAmerica.jpg')";
     }
-    else if(jAmerika.includes(drzava))
+    else if(sAmerica.includes(country))
     {
-        document.body.style.background = "url('./slike/kontinenti/jAmerika.jpg')";
+        document.body.style.background = "url('./pictures/continents/sAmerica.jpg')";
     }
-    else if(australija.includes(drzava))
+    else if(australia.includes(country))
     {
-        document.body.style.background = "url('./slike/kontinenti/australija.jpg')";
+        document.body.style.background = "url('./pictures/continents/australia.jpg')";
     }
     else
     {
-        document.body.style.background = "url('./slike/kontinenti/antarktika.jpg')";
+        document.body.style.background = "url('./pictures/continents/antarctica.jpg')";
     }
 
 }

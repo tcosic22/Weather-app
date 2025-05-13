@@ -38,7 +38,7 @@ input[type="text"] {
     box-sizing: border-box;
 }
 
-#gumbPretrazi {
+#buttonSearch {
     padding: 10px;
     background-color: #333;
     color: #fff;
@@ -47,24 +47,24 @@ input[type="text"] {
     cursor: pointer;
 }
 
-.podaci {
+.info {
     margin-top: 20px;
     padding: 20px;
 }
 
-#ikonica {
+#icon {
     width: 100px;
     height: 100px;
 }
 
-#prognoza5dana {
+#fiveDayForecast {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     column-gap: 50px;
     margin-top: 20px;
 }
 
-.dan {
+.day {
     padding: 10px;
     border: 1px solid black;
     border-radius: 20px;
